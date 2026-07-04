@@ -129,7 +129,7 @@ int main(int, char**) {
     // carga la textura con el Core (no GL directo)
     w3dLogReset();
     if (!gfx::LoadTexture("assets/Whisk3D_logo.png", g_tex)) {
-        w3dLog("textured_cube: no pude cargar assets/Whisk3D_logo.png");
+        w3dLogE("textured_cube: no pude cargar assets/Whisk3D_logo.png");
         return 1;
     }
     w3dLog("textured_cube: textura Whisk3D_logo.png cargada con el Core");

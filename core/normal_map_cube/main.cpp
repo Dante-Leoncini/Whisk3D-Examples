@@ -153,7 +153,7 @@ int main(int, char**) {
 
     w3dLogReset();
     if (!gfx::LoadTexture("assets/Whisk3D_logo_normal.png", g_nmap)) {
-        w3dLog("normal_map_cube: no pude cargar assets/Whisk3D_logo_normal.png");
+        w3dLogE("normal_map_cube: no pude cargar assets/Whisk3D_logo_normal.png");
         return 1;
     }
     w3dLog("normal_map_cube: normal map Whisk3D_logo_normal.png cargado con el Core");
