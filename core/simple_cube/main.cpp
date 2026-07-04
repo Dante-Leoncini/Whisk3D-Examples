@@ -12,6 +12,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include "w3dGraphics.h" // render del Core (w3dEngine) + MeshIndex
+#include "w3dlog.h"       // log del Core (w3dLog): a whisk3d.log en desktop, a la consola en WebGL
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
     #include <emscripten/html5.h>
@@ -120,6 +121,9 @@ int main(int, char**) {
 #ifdef W3D_WEBGL
     gfx::GLES2Init((void* (*)(const char*))SDL_GL_GetProcAddress); // backend ES2: carga GL2.0 + shaders
 #endif
+
+    w3dLogReset(); // trunca el log (desktop) / marca el inicio (web)
+    w3dLog("simple_cube: cubo iluminado con el render de Whisk3D Core (w3dEngine)");
 
     // estado fijo de la escena (persiste entre frames)
     gfx::Enable(gfx::DepthTest);

@@ -12,6 +12,7 @@ find_package(SDL2 REQUIRED)
 add_executable(simple_cube
     main.cpp
     ${W3DCORE}/w3dGraphics.cpp
+    ${W3DCORE}/w3dlog.cpp
 )
 target_include_directories(simple_cube PRIVATE ${W3DCORE})
 target_compile_definitions(simple_cube PRIVATE SDL_MAIN_HANDLED)

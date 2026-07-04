@@ -10,6 +10,7 @@
 #include <SDL2/SDL.h>
 #include "w3dGraphics.h" // render del Core (w3dEngine) + MeshIndex
 #include "w3dTexture.h"   // w3dEngine::LoadTexture
+#include "w3dlog.h"       // log del Core (w3dLog): a whisk3d.log en desktop, a la consola en WebGL
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
     #include <emscripten/html5.h>
@@ -126,10 +127,12 @@ int main(int, char**) {
 #endif
 
     // carga la textura con el Core (no GL directo)
+    w3dLogReset();
     if (!gfx::LoadTexture("assets/Whisk3D_logo.png", g_tex)) {
-        SDL_Log("no pude cargar assets/Whisk3D_logo.png");
+        w3dLog("textured_cube: no pude cargar assets/Whisk3D_logo.png");
         return 1;
     }
+    w3dLog("textured_cube: textura Whisk3D_logo.png cargada con el Core");
 
     gfx::Enable(gfx::DepthTest);
     gfx::Enable(gfx::Lighting);

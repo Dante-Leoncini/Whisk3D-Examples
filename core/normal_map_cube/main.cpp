@@ -13,6 +13,7 @@
 #include <SDL2/SDL.h>
 #include "w3dGraphics.h" // render del Core (w3dEngine) + MeshIndex
 #include "w3dTexture.h"   // w3dEngine::LoadTexture
+#include "w3dlog.h"       // log del Core (w3dLog): a whisk3d.log en desktop, a la consola en WebGL
 #include <math.h>
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
@@ -150,10 +151,12 @@ int main(int, char**) {
     gfx::GLES2Init((void* (*)(const char*))SDL_GL_GetProcAddress);
 #endif
 
+    w3dLogReset();
     if (!gfx::LoadTexture("assets/Whisk3D_logo_normal.png", g_nmap)) {
-        SDL_Log("no pude cargar assets/Whisk3D_logo_normal.png");
+        w3dLog("normal_map_cube: no pude cargar assets/Whisk3D_logo_normal.png");
         return 1;
     }
+    w3dLog("normal_map_cube: normal map Whisk3D_logo_normal.png cargado con el Core");
 
     gfx::Enable(gfx::DepthTest);
 

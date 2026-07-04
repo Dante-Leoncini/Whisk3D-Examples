@@ -14,7 +14,7 @@ CORE=../libs/Whisk3DCore   # submodulo en examples/libs/
 # --shell-file: HTML propio (canvas a pantalla completa, sin branding de emscripten)
 COMMON="-DW3D_WEBGL -I$CORE -sUSE_SDL=2 -O2 --shell-file shell.html"
 # backend de render ES2 (shaders) + math
-BACKEND="$CORE/gles2/w3dGraphicsGLES2.cpp $CORE/math/Matrix4.cpp $CORE/math/Vector3.cpp"
+BACKEND="$CORE/gles2/w3dGraphicsGLES2.cpp $CORE/math/Matrix4.cpp $CORE/math/Vector3.cpp $CORE/w3dlog.cpp"
 # loader de texturas del Core (stb): -I a stb + compila la implementacion aca
 TEX="$CORE/w3dTexture.cpp -DW3D_STB_IMPL -I$CORE/thirdparty"
 

@@ -12,6 +12,7 @@ find_package(SDL2 REQUIRED)
 add_executable(textured_cube
     main.cpp
     ${W3DCORE}/w3dGraphics.cpp
+    ${W3DCORE}/w3dlog.cpp
     ${W3DCORE}/w3dTexture.cpp
 )
 target_include_directories(textured_cube PRIVATE ${W3DCORE} ${W3DCORE}/thirdparty)
