@@ -1,0 +1,11 @@
+# builds
+build/
+*/build/
+core/web/          # salida WebGL generada por emcc
+
+# binarios
+*.exe
+*.dll
+*.wasm
+*.o
+*.obj

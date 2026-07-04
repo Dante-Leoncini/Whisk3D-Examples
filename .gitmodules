@@ -1,0 +1,6 @@
+[submodule "libs/Whisk3DCore"]
+	path = libs/Whisk3DCore
+	url = https://github.com/Dante-Leoncini/Whisk3Dcore
+[submodule "libs/WhiskUI"]
+	path = libs/WhiskUI
+	url = https://github.com/Dante-Leoncini/Whisk3D-UI
