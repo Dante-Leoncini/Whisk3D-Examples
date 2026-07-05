@@ -1,7 +1,8 @@
 # builds
 build/
 */build/
-core/web/          # salida WebGL generada por emcc
+# salida WebGL generada por emcc
+core/web/
 
 # binarios
 *.exe
