@@ -10,7 +10,7 @@ Cada ejemplo usa **solo el Core** (`w3dEngine`), sin llamar a OpenGL directament
 | --- | --- |
 | **simple_cube** | Un cubo liso iluminado por una luz. Lo mínimo: geometría + una luz + un color de material. |
 | **textured_cube** | Un cubo con una **textura** cargada de archivo. La carga la hace el Core (`w3dEngine::LoadTexture`); el ejemplo no toca ningún loader ni GL directo. |
-| **normal_map_cube** | Un cubo con **normal map (DOT3)**: el relieve es falso (la geometría es un cubo liso), pero una textura de normales hace que agarre luz como si tuviera bollos al girar. |
+| **normal_map_cube** | Un cubo con **normal map (DOT3)**: el relieve es falso (la geometría es un cubo liso), pero una textura de normales hace que agarre luz como si tuviera detalles al girar. |
 
 Los tres rotan de forma continua y se adaptan al tamaño de la ventana / el canvas.
 
@@ -34,7 +34,7 @@ cd core
 python -m http.server               # y abrís http://localhost:8000/web/simple_cube.html
 ```
 
-> WebGL no corre abriendo el `.html` con `file://` (el browser bloquea el `.wasm`): hay que servirlo por HTTP, como arriba.
+> WebGL no corre abriendo el `.html` con `file://` (el browser bloquea el `.wasm`): hay que servirlo por HTTP, como lo muestro arriba.
 
 ## Estructura
 

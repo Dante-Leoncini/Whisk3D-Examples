@@ -12,7 +12,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include "w3dGraphics.h" // render del Core (w3dEngine) + MeshIndex
-#include "w3dlog.h"       // log del Core (w3dLog): a whisk3d.log en desktop, a la consola en WebGL
+#include "w3dlog.h"      // log del Core (w3dLog): a whisk3d.log en desktop, a la consola en WebGL
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
     #include <emscripten/html5.h>
