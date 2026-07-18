@@ -31,6 +31,24 @@ echo "compilando normal_map_cube (Whisk3D_logo_normal.png embebido)..."
 emcc normal_map_cube/main.cpp $BACKEND $TEX $COMMON \
      --embed-file assets/Whisk3D_logo_normal.png -o web/normal_map_cube.html
 
+# video_alpha: video con alpha (WebM) en loop sobre video de fondo (MP4), con ASSETS
+# PROTEGIDOS. El navegador decodifica por HW; el modulo de video + el pack cifrado del
+# Core son opcionales (-DW3D_ENABLE_VIDEO). El .w3dpack se EMBEBE (bytes ilegibles): en
+# la pestania de red no queda ningun video con nombre ni URL que copiar.
+if [ -f "$CORE/video/W3dVideo.cpp" ]; then
+    echo "compilando video_alpha (assets protegidos)..."
+    VIDEO="$CORE/video/W3dVideo.cpp $CORE/video/W3dVideoWeb.cpp $CORE/io/W3dPack.cpp -DW3D_ENABLE_VIDEO"
+    EMBED=""
+    if [ -f video_alpha/assets.w3dpack ]; then
+        EMBED="--embed-file video_alpha/assets.w3dpack@assets.w3dpack"
+    else
+        echo "  (nota: falta video_alpha/assets.w3dpack -> empaquetalo con w3dpacker; el ejemplo compila pero no reproduce)"
+    fi
+    emcc video_alpha/main.cpp $BACKEND $VIDEO $COMMON $EMBED -o web/video_alpha.html
+else
+    echo "(salteando video_alpha: el submodulo Core todavia no trae video/ — falta bumpear el puntero)"
+fi
+
 echo ""
 echo "LISTO -> examples/core/web/*.html"
 echo "Para verlos (WASM no corre con file://), levanta un server local:"
