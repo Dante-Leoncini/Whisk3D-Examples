@@ -1,0 +1,38 @@
+Whisk3D {
+    version: 20260724
+    Escena {
+        fullscreen: false
+        fps: 60
+
+        Gamepad {
+            name: "Script"
+            script: "pong.lua"
+            ref_jugador1: "Pala 1"
+            ref_jugador2: "Pala 2"
+            ref_pelota: "Pelota"
+            ref_marcador1: "Marcador 1"
+            ref_marcador2: "Marcador 2"
+            ref_dificultad: "normal"
+        }
+
+        UI {
+            archivo: "pong.w3dui"
+        }
+    }
+
+    Layout {
+        ViewportRow {
+            ViewportColumn {
+                Editor2D
+                Timeline
+                Split: 0.8
+            }
+            ViewportColumn {
+                Outliner
+                Properties
+                Split: 0.4
+            }
+            Split: 0.72
+        }
+    }
+}
