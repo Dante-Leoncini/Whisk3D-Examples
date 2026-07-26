@@ -59,3 +59,29 @@ y el engine del juego se compila como siempre (ver `Whisk3D-Examples/core`).
 El interprete lua vive en `Whisk3DCore` (Lua 5.4 vendorizado, C plano): el
 mismo runtime corre en PC, web y Symbian; lo que no corre en el N95 es el
 EMPAQUETADO del editor, no el juego.
+
+
+## Compilar el juego SIN el editor
+
+El pong es un juego Whisk3D 2D: una interfaz (`.w3dui`) + un script Lua. El runtime
+`examples/game/w3drun` reusa el mismo render 2D y el mismo interprete lua del editor,
+asi que el juego corre solo en PC y en la web con el mismo codigo.
+
+**Linux (OpenGL):**
+```sh
+cd examples/ui/pong
+cmake -S . -B build && cmake --build build -j
+./build/pong
+```
+
+**WebGL (Emscripten):**
+```sh
+source /ruta/a/emsdk/emsdk_env.sh
+cd examples/ui/pong
+./build_web.sh              # -> web/pong.html
+python -m http.server      # y abri http://localhost:8000/web/pong.html
+```
+
+Ambos builds apuntan al repo del editor (`../../../Whisk3D`) por el Core, la UI 2D y
+lua. Desde el editor, el boton **Compilar juego** (tarjeta Juego) automatiza esto y
+deja elegir la plataforma (Linux .deb / AppImage / WebGL).
