@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- El WhiskPaddle lee su UI/lua/tipografia de los ASSETS del APK (no del almacenamiento),
+         asi que NO necesita permisos de archivos. -->
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <!-- singleTask + configChanges: rotar/mostrar teclado NO recrea la Activity (con los globals
+             estaticos vivos, relanzar main() duplicaria la escena y perderia el contexto GL). SDL maneja el resize. -->
+        <activity
+            android:name=".WhiskPaddleActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode|density|touchscreen|locale|fontScale"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

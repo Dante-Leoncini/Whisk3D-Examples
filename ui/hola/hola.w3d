@@ -1,0 +1,25 @@
+{
+  "version": 3,
+  "fps": 60,
+  "fullscreen": false,
+  "escena": {
+    "objetos": [
+      {
+        "tipo": "script",
+        "nombre": "Script",
+        "pos": [0, 0, 0],
+        "rot": [0, 0, 0],
+        "escala": [1, 1, 1],
+        "fisica": { "velocidad": 0.1, "piso": 0, "gravedad": 1, "limiteIzquierdo": -2, "limiteDerecho": 2, "limiteFondo": -2, "limiteFrente": 2, "velocidadMaximaCaida": 2, "potenciaSalto": 2 },
+        "scripts": [
+          { "archivo": "hola.lua", "refs": { "cuadro": "Cuadro" } }
+        ]
+      },
+      {
+        "tipo": "ui",
+        "archivo": "hola.w3dui"
+      }
+    ]
+  },
+  "layout": "Layout {\n  ViewportRow {\n    ViewportColumn {\n      Editor2D\n      Timeline\n      Split: 0.8\n    }\n    ViewportColumn {\n      Outliner\n      Properties\n      Split: 0.4\n    }\n    Split: 0.72\n  }\n}"
+}

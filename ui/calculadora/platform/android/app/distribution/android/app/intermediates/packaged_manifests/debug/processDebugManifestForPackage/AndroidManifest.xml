@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.whisk3d.calculadora"
+    android:versionCode="1"
+    android:versionName="26.07.30" >
+
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="34" />
+
+    <!--
+     El Calculadora lee su UI/lua/tipografia de los ASSETS del APK (no del almacenamiento),
+         asi que NO necesita permisos de archivos.
+    -->
+    <application
+        android:allowBackup="true"
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+        android:debuggable="true"
+        android:extractNativeLibs="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme" >
+
+        <!--
+             singleTask + configChanges: rotar/mostrar teclado NO recrea la Activity (con los globals
+             estaticos vivos, relanzar main() duplicaria la escena y perderia el contexto GL). SDL maneja el resize.
+        -->
+        <!--
+             una calculadora se usa PARADA: la orientacion queda clavada en vertical
+             (mas el hint SDL_HINT_ORIENTATIONS del main.cpp, que le avisa a SDL)
+        -->
+        <activity
+            android:name="com.whisk3d.calculadora.CalculadoraActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode|density|touchscreen|locale|fontScale"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

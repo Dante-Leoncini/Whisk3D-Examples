@@ -1,0 +1,44 @@
+{
+  "version": 3,
+  "icono": "assets/icono.png",
+  "compilar": {
+    "modoVentana": "ventana",
+    "orientacion": "vertical",
+    "fisica": false,
+    "sonido": false,
+    "debug": true,
+    "assets": "sueltos",
+    "plataforma": "linux-deb"
+  },
+  "paletas": [
+    { "nombre": "Consola", "colores": [
+      { "nombre": "rojo", "color": [0.85, 0.22, 0.2, 1] },
+      { "nombre": "amarillo", "color": [0.95, 0.78, 0.2, 1] },
+      { "nombre": "azul", "color": [0.2, 0.55, 0.95, 1] },
+      { "nombre": "gris", "color": [0.45, 0.45, 0.5, 1] },
+      { "nombre": "texto", "color": [1, 1, 1, 1] },
+      { "nombre": "borde", "color": [0.05, 0.05, 0.05, 1] },
+      { "nombre": "fondoPanel", "color": [0.02, 0.02, 0.04, 1] }
+    ] },
+    { "nombre": "Neon", "colores": [
+      { "nombre": "rojo", "color": [1, 0.1, 0.45, 1] },
+      { "nombre": "amarillo", "color": [1, 0.95, 0.1, 1] },
+      { "nombre": "azul", "color": [0, 0.9, 1, 1] },
+      { "nombre": "gris", "color": [0.55, 0.3, 0.85, 1] },
+      { "nombre": "texto", "color": [0.85, 1, 0.95, 1] },
+      { "nombre": "borde", "color": [0.1, 0, 0.2, 1] },
+      { "nombre": "fondoPanel", "color": [0.05, 0, 0.12, 1] }
+    ] }
+  ],
+  "fps": 60,
+  "fullscreen": false,
+  "escena": {
+    "objetos": [
+      {
+        "tipo": "ui",
+        "archivo": "consola.w3dui"
+      }
+    ]
+  },
+  "layout": "Layout {\n  ViewportRow {\n    ViewportColumn {\n      ViewportColumn {\n        Editor2D\n        Console\n        Split: 0.709411\n      }\n      Timeline\n      Split: 0.956479\n    }\n    ViewportColumn {\n      Outliner\n      Properties\n      Split: 0.4\n    }\n    Split: 0.72\n  }\n}"
+}

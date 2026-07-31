@@ -1,0 +1,63 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.whisk3d.whiskpaddle"
+4    android:versionCode="1"
+5    android:versionName="26.07.30" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="34" />
+10
+11    <!--
+12     El WhiskPaddle lee su UI/lua/tipografia de los ASSETS del APK (no del almacenamiento),
+13         asi que NO necesita permisos de archivos.
+14    -->
+15    <application
+15-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:7:5-28:19
+16        android:allowBackup="true"
+16-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:8:9-35
+17        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+17-->[androidx.core:core:1.1.0] /home/dante/.gradle/caches/8.9/transforms/6f61606391ba590d6ca80cbdda7a3ded/transformed/core-1.1.0/AndroidManifest.xml:24:18-86
+18        android:debuggable="true"
+19        android:extractNativeLibs="true"
+20        android:icon="@mipmap/ic_launcher"
+20-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:10:9-43
+21        android:label="@string/app_name"
+21-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:9:9-41
+22        android:roundIcon="@mipmap/ic_launcher_round"
+22-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:11:9-54
+23        android:supportsRtl="true"
+23-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:12:9-35
+24        android:theme="@style/AppTheme" >
+24-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:13:9-40
+25
+26        <!--
+27             singleTask + configChanges: rotar/mostrar teclado NO recrea la Activity (con los globals
+28             estaticos vivos, relanzar main() duplicaria la escena y perderia el contexto GL). SDL maneja el resize.
+29        -->
+30        <activity
+30-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:16:9-26:20
+31            android:name="com.whisk3d.whiskpaddle.WhiskPaddleActivity"
+31-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:17:13-48
+32            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode|density|touchscreen|locale|fontScale"
+32-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:20:13-170
+33            android:exported="true"
+33-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:18:13-36
+34            android:label="@string/app_name"
+34-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:21:13-45
+35            android:launchMode="singleTask" >
+35-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:19:13-44
+36            <intent-filter>
+36-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:22:13-25:29
+37                <action android:name="android.intent.action.MAIN" />
+37-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:23:17-69
+37-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:23:25-66
+38
+39                <category android:name="android.intent.category.LAUNCHER" />
+39-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:24:17-77
+39-->/home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/AndroidManifest.xml:24:27-74
+40            </intent-filter>
+41        </activity>
+42    </application>
+43
+44</manifest>

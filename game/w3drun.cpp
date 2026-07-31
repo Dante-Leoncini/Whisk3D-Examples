@@ -7,10 +7,14 @@
 #include "objects/Objects.h"
 #include "objects/UI.h"
 #include "objects/Texto2D.h"
+#include "objects/Imagen2D.h"
 #include "objects/Elemento2D.h"
 #include "io/UI2DFormato.h"
 #include "render/UIOverlay.h"
 #include "script/W3dScript.h"
+#include "script/BindsJuego.h"   // los binds 2D de juego COMPARTIDOS con el editor (Play)
+#include "physics/W3dFisica.h"   // paso de fisica del Core (el MISMO que corre el Play del editor)
+#include "W3dEscena.h"           // motor multi-escena COMPARTIDO con el editor (activa / cambiarEscena)
 #include "w3dGraphics.h"
 #include "WhiskUI/draw/glesdraw.h"   // W3dPantallaAlto (flip Y del scissor)
 
@@ -21,6 +25,7 @@ extern "C" {
 
 #include <vector>
 #include <string>
+#include <math.h>   // fabsf() para chocan()
 
 namespace gfx = w3dEngine;
 
@@ -32,124 +37,57 @@ bool  g_redraw = true;                 // el editor lo usa para redibujar por ev
 float g_gameRenderW = 480.0f;          // tamano de la "ventana de render" del juego
 float g_gameRenderH = 480.0f;          // (UIOverlay lo lee via UI2D_TamanoVentana)
 
+// ZONA SEGURA: insets (notch/barras) en px de ventana, los pone la plataforma (Android). El fondo (clear)
+// llena TODA la ventana (se ve detras del notch); la UI se acota a este rect. 0 = sin recorte (PC/web).
+static float g_safeL = 0, g_safeT = 0, g_safeR = 0, g_safeB = 0;
+void W3dGameSafeArea(int l, int t, int r, int b) {
+    g_safeL = (float)(l < 0 ? 0 : l); g_safeT = (float)(t < 0 ? 0 : t);
+    g_safeR = (float)(r < 0 ? 0 : r); g_safeB = (float)(b < 0 ? 0 : b);
+}
+// pedido de cierre del juego (lua salir()); la plataforma lo consulta cada frame y corta el loop.
+// El flag vive en BindsJuego (donde esta el bind salir()), compartido con el editor.
+bool W3dGameQuierePararse() { return BindsJuegoQuierePararse(); }
+
 // la tipografia pixel (font.png); Fuente2D la pide con W3dGameFontPng()
 static std::string gFontPng = "font.png";
 void W3dGameFontPngSet(const std::string& ruta) { gFontPng = ruta; }
 const char* W3dGameFontPng() { return gFontPng.c_str(); }
 
 // ---------------------------------------------------------------------------
-//  STUBS de imagen/video: el pong es solo rectangulos + texto, no usa texturas
+//  STUBS de imagen/video: el juego es solo rectangulos + texto, no usa texturas
 //  ni video. UIOverlay igual referencia estas funciones (para los otros tipos),
 //  asi que se stubean -> el runtime no arrastra ffmpeg ni el cache de video.
 //  (Un juego con imagenes linkearia el Textura2D/Video2DCache reales en su lugar.)
 // ---------------------------------------------------------------------------
 #ifdef W3D_GAME_NO_TEX
-unsigned Textura2DObtener(const std::string&, int* w, int* h) { if (w) *w = 0; if (h) *h = 0; return 0; }
-std::string Textura2DRutaDecodificable(const std::string& r) { return r; }
+// el juego SI usa una imagen (el parlante) -> Textura2DObtener/RutaDecodificable REALES (Textura2D.cpp en
+// el build). Pero NO usa video: se stubea solo el video para no arrastrar el cache de video / ffmpeg.
 struct VideoPreview;
 const VideoPreview* Video2DPreview(const std::string&) { return 0; }
 unsigned W3dMsAhora() { return 0; }
 #endif
 
 // ---------------------------------------------------------------------------
-//  BINDINGS 2D del juego (los mismos nombres que ve el script en el editor):
-//  pantalla/posPx/setPosPx/tamPx/setTamPx/setTexto. Coordenadas en PIXELES del
-//  lienzo con (0,0) en el CENTRO. Se registran via W3dScriptSetBindExtra.
+//  BINDINGS 2D del juego: AHORA viven en BindsJuego.{h,cpp} (compartidos con el
+//  editor), y se registran via W3dScriptSetBindExtra(BindsJuegoRegistrar) en
+//  W3dGameCargarUI. Aca solo queda lo PROPIO del runtime: el UI del juego, el
+//  mapeo ventana<->lienzo del input, y el alimentar el estado de BindsJuego.
 // ---------------------------------------------------------------------------
 static UI* UIJuego() {
+    // con el juego corriendo manda la escena ACTIVA (su lienzo/tamano); antes de
+    // W3dGameInicio (gActiva NULL) cae a la primera UI de la escena.
+    UI* act = W3dEscenaActiva();
+    if (act) return act;
     if (!SceneCollection) return 0;
     for (size_t i = 0; i < SceneCollection->Childrens.size(); i++)
         if (SceneCollection->Childrens[i]->getType() == ObjectType::ui)
             return (UI*)SceneCollection->Childrens[i];
     return 0;
 }
-static void TamLienzo(float* w, float* h) {
-    // EL MISMO tamaño que ve el RENDER del overlay (UI2D_TamanoVentana lee g_gameRenderW/H): asi el
-    // script (pantalla/posPx) y el dibujo COINCIDEN. Lo pone W3dGameRender: la ventana real si la UI es
-    // "igual que el render" (dinamico), o el tamaño fijo de la UI si no. Sin esto, con igualQueRender el
-    // script usaba la ventana (600) y el overlay el tamaño fijo (480) -> todo descolocado (bug Dante).
-    *w = g_gameRenderW; *h = g_gameRenderH;
-}
-static int LPantalla(lua_State* L) {
-    float w, h; TamLienzo(&w, &h);
-    lua_pushnumber(L, w); lua_pushnumber(L, h); return 2;
-}
-static int LPosPx(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    float w, h; TamLienzo(&w, &h);
-    if (!o) { lua_pushnumber(L, 0); lua_pushnumber(L, 0); return 2; }
-    lua_pushnumber(L, o->pos.x * w); lua_pushnumber(L, o->pos.y * h); return 2;
-}
-static int LSetPosPx(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    float w, h; TamLienzo(&w, &h);
-    if (o && w > 0 && h > 0) { o->pos.x = (float)luaL_checknumber(L, 2) / w;
-                               o->pos.y = (float)luaL_checknumber(L, 3) / h; }
-    return 0;
-}
-static int LTamPx(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    float w, h; TamLienzo(&w, &h);
-    if (o && UI2D_EsElemento2D(o)) {
-        Elemento2D* e = (Elemento2D*)o;
-        lua_pushnumber(L, e->tamPx ? e->ancho : e->ancho * w);
-        lua_pushnumber(L, e->tamPx ? e->alto  : e->alto  * h);
-    } else { lua_pushnumber(L, 0); lua_pushnumber(L, 0); }
-    return 2;
-}
-static int LSetTamPx(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    float w, h; TamLienzo(&w, &h);
-    if (o && UI2D_EsElemento2D(o) && w > 0 && h > 0) {
-        Elemento2D* e = (Elemento2D*)o;
-        float nw = (float)luaL_checknumber(L, 2), nh = (float)luaL_checknumber(L, 3);
-        if (e->tamPx) { e->ancho = nw; e->alto = nh; }
-        else          { e->ancho = nw / w; e->alto = nh / h; }
-    }
-    return 0;
-}
-static int LSetTexto(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    if (o && o->getType() == ObjectType::texto2d) {
-        const char* s = lua_tostring(L, 2);
-        ((Texto2D*)o)->texto = s ? s : "";
-    }
-    return 0;
-}
-// mostrar/setOpacidad/setTam: mismas que la API del editor (ScriptUI.cpp) -> el mismo pong.lua corre
-// standalone. mostrar prende/apaga el objeto (menus); setOpacidad = crossfade; setTam = tamaño de fuente.
-static int LMostrar(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    if (o) o->visible = lua_toboolean(L, 2) != 0;
-    return 0;
-}
-static int LSetOpacidad(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    if (o && UI2D_EsElemento2D(o)) {
-        float a = (float)luaL_checknumber(L, 2);
-        if (a < 0.0f) a = 0.0f; if (a > 1.0f) a = 1.0f;
-        ((Elemento2D*)o)->opacidad = a;
-    }
-    return 0;
-}
-static int LSetTam(lua_State* L) {
-    Object* o = W3dScriptParamObjeto(L, 1);
-    if (o && o->getType() == ObjectType::texto2d)
-        ((Texto2D*)o)->tam = (float)luaL_checknumber(L, 2);
-    return 0;
-}
-static void RegistrarBind(void* Lv) {
-    lua_State* L = (lua_State*)Lv;
-    lua_pushcfunction(L, LPantalla); lua_setglobal(L, "pantalla");
-    lua_pushcfunction(L, LPosPx);    lua_setglobal(L, "posPx");
-    lua_pushcfunction(L, LSetPosPx); lua_setglobal(L, "setPosPx");
-    lua_pushcfunction(L, LTamPx);    lua_setglobal(L, "tamPx");
-    lua_pushcfunction(L, LSetTamPx); lua_setglobal(L, "setTamPx");
-    lua_pushcfunction(L, LSetTexto); lua_setglobal(L, "setTexto");
-    lua_pushcfunction(L, LMostrar);     lua_setglobal(L, "mostrar");
-    lua_pushcfunction(L, LSetOpacidad); lua_setglobal(L, "setOpacidad");
-    lua_pushcfunction(L, LSetTam);      lua_setglobal(L, "setTam");
-}
+
+// mapeo del ULTIMO render (ventana -> lienzo) para el INPUT (WinALienzo): escala + offset del letterbox /
+// zona segura. Lo fija W3dGameRender cada frame (y ademas se lo pasa a BindsJuego para areaSegura/cajaUI).
+static float gUltEsc = 1.0f, gUltX0 = 0.0f, gUltY0 = 0.0f;
 
 // ---------------------------------------------------------------------------
 //  Estado del juego cargado
@@ -160,13 +98,26 @@ bool W3dGameCargarUI(const std::string& ruta) {
     // la RAIZ de la escena (el editor usa un Scene; el runtime, un Object pelado):
     // los objetos nuevos se cuelgan de aca, y UI2DCargar necesita que exista
     if (!SceneCollection) SceneCollection = new Object(0, "Scene");
-    W3dScriptSetBindExtra(RegistrarBind);   // registrar la API 2D antes de cargar scripts
+    W3dScriptSetBindExtra(BindsJuegoRegistrar);   // registrar la API 2D compartida antes de cargar scripts
     UI* u = UI2DCargar(ruta);
     if (!u) return false;
     gDuenio = u;
     g_gameRenderW = u->ancho; g_gameRenderH = u->alto;
     return true;
 }
+
+// MULTI-ESCENA: carga UNA escena mas (un .w3dui) y la ACUMULA en SceneCollection (UI2DCargar
+// se auto-cuelga sin pisar las anteriores). Sus scripts salen del propio .w3dui (array root
+// "scripts"), no se agregan con W3dGameScript. Llamar una vez por escena, antes de W3dGameInicio.
+bool W3dGameCargarEscena(const std::string& ruta) {
+    if (!SceneCollection) SceneCollection = new Object(0, "Scene");
+    W3dScriptSetBindExtra(BindsJuegoRegistrar);   // la API 2D compartida (incluye cambiarEscena)
+    UI* u = UI2DCargar(ruta);
+    if (!u) return false;
+    return true;
+}
+// nombre de la escena que ARRANCA (el campo "nombre" de su .w3dui). Sin esto arranca la primera.
+void W3dGameEscenaInicial(const std::string& nombre) { W3dEscenaSetInicial(nombre); }
 
 void W3dGameScript(const std::string& rutaLua) {
     if (!gDuenio) return;
@@ -189,36 +140,84 @@ static Object* BuscarPorNombre(Object* o, const std::string& n) {
     return 0;
 }
 
-void W3dGameInicio() {
-    if (!gDuenio || !gDuenio->scriptDatos) return;
-    if (!W3dScriptCargar(gDuenio)) return;
-    // resolver las referencias (por nombre) y las opciones de cada script
-    for (size_t e = 0; e < gDuenio->scriptDatos->scripts.size(); e++) {
-        const W3dScriptEntrada& ent = gDuenio->scriptDatos->scripts[e];
-        for (size_t r = 0; r < ent.refs.size(); r++) {
-            Object* obj = BuscarPorNombre(SceneCollection, ent.refs[r].second);
-            if (obj) W3dScriptResolverRef(gDuenio, (int)e, ent.refs[r].first, obj);
-            W3dScriptResolverOpcion(gDuenio, (int)e, ent.refs[r].first, ent.refs[r].second);
+// init de UN subarbol: carga+resuelve+inicio() de cada objeto con script (orden de arbol).
+// Las refs se buscan dentro de la RAIZ de la escena del dueno (no en toda SceneCollection),
+// para que no colisionen nombres repetidos entre escenas. reiniciar=true recrea los lua_State.
+static void RuntimeInitSubtree(Object* o, bool reiniciar) {
+    if (!o) return;
+    if (o->scriptDatos && !o->scriptDatos->scripts.empty()) {
+        if (reiniciar) W3dScriptDescargarDe(o);
+        if (W3dScriptCargar(o)) {
+            for (size_t e = 0; e < o->scriptDatos->scripts.size(); e++) {
+                const W3dScriptEntrada& ent = o->scriptDatos->scripts[e];
+                for (size_t r = 0; r < ent.refs.size(); r++) {
+                    Object* obj = BuscarPorNombre(W3dEscenaRaizDe(o), ent.refs[r].second);
+                    if (obj) W3dScriptResolverRef(o, (int)e, ent.refs[r].first, obj);
+                    W3dScriptResolverOpcion(o, (int)e, ent.refs[r].first, ent.refs[r].second);
+                }
+            }
+            W3dScriptInicio(o);
         }
     }
-    W3dScriptInicio(gDuenio);
+    for (size_t i = 0; i < o->Childrens.size(); i++)
+        RuntimeInitSubtree(o->Childrens[i], reiniciar);
+}
+// callback de init de UNA escena (lo registra W3dEscenaSetInit): lo llama el motor
+// al arrancar la inicial y en el init perezoso de cada escena destino de cambiarEscena().
+static void RuntimeInitEscena(UI* u, bool reiniciar) { RuntimeInitSubtree((Object*)u, reiniciar); }
+
+void W3dGameInicio() {
+    W3dEscenaSetInit(RuntimeInitEscena);
+    W3dEscenaRegistrarTodas();
+    // inicial: la fijada con W3dGameEscenaInicial()/el .w3d; sino la escena del camino LEGACY
+    // (gDuenio, W3dGameCargarUI); sino la primera registrada (fallback de W3dEscenaArrancar).
+    std::string ini = W3dEscenaInicial();
+    if (ini.empty() && gDuenio) ini = gDuenio->name;
+    W3dEscenaSetInicial(ini);
+    if (W3dEscenaHayEscenas()) W3dEscenaArrancar();   // muestra + inicia SOLO la escena inicial
+    else if (gDuenio)          RuntimeInitSubtree(gDuenio, false);   // defensivo (no deberia pasar)
+}
+
+// corre actualizar() de los objetos con script del subarbol de la escena ACTIVA (y visibles).
+static void RuntimeActualizarSubtree(Object* o, float dt) {
+    if (!o) return;
+    if (W3dEscenaEsDeActiva(o) && o->scriptDatos && !o->scriptDatos->scripts.empty())
+        W3dScriptActualizar(o, dt);
+    for (size_t i = 0; i < o->Childrens.size(); i++)
+        RuntimeActualizarSubtree(o->Childrens[i], dt);
 }
 
 void W3dGameActualizar(float dt) {
-    if (gDuenio) W3dScriptActualizar(gDuenio, dt);
+    // FISICA del Core (velocidad + rebotes): PRIMERO se integran las posiciones y despues corren
+    // los scripts, asi el script ve la posicion nueva y resuelve el choque (rebotar) en el MISMO
+    // frame. Mismo orden y mismo dt que el Play del editor (TickReal en main/script/SimJuego.cpp).
+    W3dFisicaPaso(dt);
+    UI* act = W3dEscenaActiva();
+    if (act)             RuntimeActualizarSubtree((Object*)act, dt);
+    else if (gDuenio)    W3dScriptActualizar(gDuenio, dt);   // legacy antes de Inicio (no deberia pasar)
+    // SNAPSHOT del estado apretado para el flanco de apretado() del PROXIMO frame: se hace DESPUES de correr
+    // los scripts, asi todas las llamadas a apretado() de ESTE frame ven el mismo "estado anterior".
+    BindsJuegoSnapshotPunteros();
+    // el cambio pedido por cambiarEscena() se aplica ACA, al final del frame (no en el callback:
+    // no mutar la iteracion de arriba). El init perezoso de la escena destino corre en este punto.
+    W3dEscenaAplicarPendiente();
 }
-
-// mapeo del ultimo render (ventana -> lienzo), para convertir el toque a coords del lienzo
-static float gUltEsc = 1.0f, gUltX0 = 0.0f, gUltY0 = 0.0f;
 
 // dibuja la UI en 2D (ortho), centrada y escalada para ENTRAR en la ventana
 void W3dGameRender(int winW, int winH) {
     if (winW < 1) winW = 1; if (winH < 1) winH = 1;
     // el lienzo del juego: la ventana REAL si la UI es "igual que el render" (dinamico), o su tamaño
     // FIJO si no. Lo leen TANTO el script (TamLienzo) como el overlay (UI2D_TamanoVentana) -> coinciden.
-    { UI* ug = UIJuego();
-      if (ug && ug->igualQueRender) { g_gameRenderW = (float)winW; g_gameRenderH = (float)winH; }
-      else if (ug) { g_gameRenderW = ug->ancho; g_gameRenderH = ug->alto; } }
+    // zona SEGURA (descuenta notch/barras): la UI se dibuja adentro; el fondo (clear) llena TODA la ventana,
+    // asi el color de fondo se ve DETRAS del notch pero la UI no queda tapada.
+    float sl = g_safeL, st = g_safeT, sr = g_safeR, sb = g_safeB;
+    if (sl + sr >= winW) { sl = 0; sr = 0; }
+    if (st + sb >= winH) { st = 0; sb = 0; }
+    float safeW = (float)winW - sl - sr, safeH = (float)winH - st - sb;
+    UI* ug = UIJuego();
+    bool igual = (ug && ug->igualQueRender);
+    if (igual) { g_gameRenderW = safeW; g_gameRenderH = safeH; }
+    else if (ug) { g_gameRenderW = ug->ancho; g_gameRenderH = ug->alto; }
     W3dPantallaAlto = winH;
     gfx::Viewport(0, 0, winW, winH);
     gfx::ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -235,37 +234,57 @@ void W3dGameRender(int winW, int winH) {
     gfx::DisableArray(gfx::NormalArray); gfx::DisableArray(gfx::ColorArray);
     gfx::DisableArray(gfx::TexCoordArray); gfx::EnableArray(gfx::VertexArray);
 
-    float lw, lh; TamLienzo(&lw, &lh);
+    float lw, lh; UI2D_TamanoLienzo(&lw, &lh);
     if (lw < 1) lw = 1; if (lh < 1) lh = 1;
-    float esc = (float)winW / lw; if ((float)winH / lh < esc) esc = (float)winH / lh;
-    float dw = lw * esc, dh = lh * esc;
-    float x0 = (winW - dw) * 0.5f, y0 = (winH - dh) * 0.5f;
-    gUltEsc = esc; gUltX0 = x0; gUltY0 = y0;   // para convertir el toque a lienzo
+    float esc, dw, dh, x0, y0;
+    if (igual) {
+        // lienzo = rect SEGURO, 1:1 (sin letterbox): la UI entra justo en la zona segura
+        esc = 1.0f; dw = safeW; dh = safeH; x0 = sl; y0 = st;
+    } else {
+        // UI de tamaño fijo: encajar (letterbox) DENTRO del rect seguro
+        esc = safeW / lw; if (safeH / lh < esc) esc = safeH / lh;
+        dw = lw * esc; dh = lh * esc;
+        x0 = sl + (safeW - dw) * 0.5f; y0 = st + (safeH - dh) * 0.5f;
+    }
+    gUltEsc = esc; gUltX0 = x0; gUltY0 = y0;   // para convertir el toque a lienzo (input, WinALienzo)
 
     UI2D_BaseRecorte(0, 0, winW, winH);
-    UI2D_DibujarOverlay(x0, y0, dw, dh, esc, 0);
-
+    // pedirle al overlay las posiciones RESUELTAS (para que cajaUI() las lea desde el lua)
+    std::vector<UI2DPos> posiciones;
+    UI2D_DibujarOverlay(x0, y0, dw, dh, esc, &posiciones);
+    // alimentar a BindsJuego el mapeo + el rect SEGURO (px de ventana) + las posiciones resueltas,
+    // para que areaSegura()/cajaUI() lean lo mismo que se dibujo (IGUAL que en el editor via SimJuego)
+    BindsJuegoRender(esc, x0, y0, sl, st, safeW, safeH, &posiciones);
 }
 
 // ---- input ----
-void W3dGameToque(int winX, int winY, bool activo) {
-    float lw, lh; TamLienzo(&lw, &lh);
-    float cx = 0, cy = 0;
+// convierte px de VENTANA a px del LIENZO (centro en 0,0) con el escalado del ultimo render. Lo comparten
+// las 3 entradas de puntero (toque/dedo/raton): solo cambian a que funcion del script le pasan cx,cy.
+static void WinALienzo(int winX, int winY, float* cx, float* cy) {
+    float lw, lh; UI2D_TamanoLienzo(&lw, &lh);
+    if (lw < 1.0f) lw = 1.0f; if (lh < 1.0f) lh = 1.0f;
+    *cx = 0; *cy = 0;
     if (gUltEsc > 0.0001f) {
-        cx = (winX - gUltX0) / gUltEsc - lw * 0.5f;
-        cy = (winY - gUltY0) / gUltEsc - lh * 0.5f;
+        *cx = (winX - gUltX0) / gUltEsc - lw * 0.5f;
+        *cy = (winY - gUltY0) / gUltEsc - lh * 0.5f;
     }
-    W3dScriptToque(cx, cy, activo);
 }
-// MOUSE-OVER: posicion del mouse (sin clic) -> raton() en lua (resaltar la opcion bajo el cursor)
+void W3dGameToque(int winX, int winY, bool activo) {
+    float cx, cy; WinALienzo(winX, winY, &cx, &cy); W3dScriptToque(cx, cy, activo);
+    // cache en LIENZO para apretado()/etc (el toque = dedo/slot 0)
+    BindsJuegoPunto(0, cx, cy, activo);
+}
+// MULTI-TOUCH: un dedo idx (0-based) -> dedo(idx+1) en lua (2 jugadores tactiles, cada uno con su dedo)
+void W3dGameDedo(int idx, int winX, int winY, bool activo) {
+    float cx, cy; WinALienzo(winX, winY, &cx, &cy); W3dScriptDedo(idx, cx, cy, activo);
+    BindsJuegoPunto(idx, cx, cy, activo);
+}
+// MOUSE-OVER: posicion del mouse SIN clic -> raton() en lua (resaltar la opcion bajo el cursor)
 void W3dGameRaton(int winX, int winY, bool dentro) {
-    float lw, lh; TamLienzo(&lw, &lh);
-    float cx = 0, cy = 0;
-    if (gUltEsc > 0.0001f) {
-        cx = (winX - gUltX0) / gUltEsc - lw * 0.5f;
-        cy = (winY - gUltY0) / gUltEsc - lh * 0.5f;
-    }
-    W3dScriptRaton(cx, cy, dentro);
+    float cx, cy; WinALienzo(winX, winY, &cx, &cy); W3dScriptRaton(cx, cy, dentro);
+    // cache en LIENZO para el overlay (borde de hover de los botones). Solo los eventos
+    // de MOUSE llegan aca: en tactil no se alimenta y no hay hover.
+    BindsJuegoRaton(cx, cy, dentro);
 }
 void W3dGameStick(int cual, float x, float y) { W3dScriptStick(cual, x, y); }
 void W3dGameBoton(const char* nombre, bool v)  { W3dScriptBotonPad(nombre, v); }
@@ -285,7 +304,7 @@ void W3dGameTecla(int sdlk, bool apretada) {
 }
 
 // ---------------------------------------------------------------------------
-//  STUBS 3D: el pong es 2D puro (rects + texto). El Core linkea Mesh (Objects/
+//  STUBS 3D: el juego es 2D puro (rects + texto). El Core linkea Mesh (Objects/
 //  W3dScript lo referencian) pero el juego NUNCA crea uno -> estos metodos de
 //  edit-mode viven en el editor (main/); aca se stubean para satisfacer el
 //  linker. Un juego 3D linkearia el editor/edit real en su lugar.

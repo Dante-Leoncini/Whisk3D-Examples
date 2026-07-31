@@ -1,0 +1,12 @@
+<resources>
+    <!-- Pantalla completa, sin action bar ni titulo. El "dibujar detras del notch" y los
+         insets seguros se manejan en WhiskPaddleActivity (programatico, por nivel de API). -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="colorPrimary">#000000</item>
+        <item name="colorPrimaryDark">#000000</item>
+        <item name="colorAccent">#000000</item>
+    </style>
+</resources>

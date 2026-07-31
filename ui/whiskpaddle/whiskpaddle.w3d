@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "icono": "assets/icono.png",
+  "escenaInicial": "Menu",
+  "fps": 60,
+  "fullscreen": false,
+  "escena": {
+    "objetos": [
+      {
+        "tipo": "ui",
+        "archivo": "menu.w3dui"
+      },
+      {
+        "tipo": "ui",
+        "archivo": "dificultad.w3dui"
+      },
+      {
+        "tipo": "ui",
+        "archivo": "juego.w3dui"
+      }
+    ]
+  },
+  "layout": "Layout {\n  ViewportRow {\n    ViewportColumn {\n      Editor2D\n      Timeline\n      Split: 0.8\n    }\n    ViewportColumn {\n      Outliner\n      Properties\n      Split: 0.4\n    }\n    Split: 0.72\n  }\n}"
+}

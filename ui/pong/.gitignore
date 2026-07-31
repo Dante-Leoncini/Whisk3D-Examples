@@ -1,4 +1,0 @@
-# salidas de compilacion (se regeneran con CMake / build_web.sh)
-build/
-build_juego/
-web/

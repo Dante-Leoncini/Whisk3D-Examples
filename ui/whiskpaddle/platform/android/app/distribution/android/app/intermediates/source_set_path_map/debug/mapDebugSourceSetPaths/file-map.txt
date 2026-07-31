@@ -1,0 +1,10 @@
+com.whisk3d.whiskpaddle.app-appcompat-1.1.0-0 /home/dante/.gradle/caches/8.9/transforms/05d6de65a18d1a783e452d0c6ac64abb/transformed/appcompat-1.1.0/res
+com.whisk3d.whiskpaddle.app-core-1.1.0-1 /home/dante/.gradle/caches/8.9/transforms/6f61606391ba590d6ca80cbdda7a3ded/transformed/core-1.1.0/res
+com.whisk3d.whiskpaddle.app-appcompat-resources-1.1.0-2 /home/dante/.gradle/caches/8.9/transforms/d2011d3dca4edcf92de2910d976e86ff/transformed/appcompat-resources-1.1.0/res
+com.whisk3d.whiskpaddle.app-pngs-3 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/distribution/android/app/generated/res/pngs/debug
+com.whisk3d.whiskpaddle.app-resValues-4 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/distribution/android/app/generated/res/resValues/debug
+com.whisk3d.whiskpaddle.app-mergeDebugResources-5 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/distribution/android/app/intermediates/incremental/debug/mergeDebugResources/merged.dir
+com.whisk3d.whiskpaddle.app-mergeDebugResources-6 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/distribution/android/app/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+com.whisk3d.whiskpaddle.app-debug-7 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/distribution/android/app/intermediates/merged_res/debug/mergeDebugResources
+com.whisk3d.whiskpaddle.app-debug-8 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/debug/res
+com.whisk3d.whiskpaddle.app-main-9 /home/dante/Documentos/Whisk3decosystem/Whisk3D-Examples/ui/whiskpaddle/platform/android/app/src/main/res
