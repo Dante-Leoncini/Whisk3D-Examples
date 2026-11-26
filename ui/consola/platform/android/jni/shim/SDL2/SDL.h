@@ -1,2 +1,0 @@
-// SHIM
-#include <SDL.h>

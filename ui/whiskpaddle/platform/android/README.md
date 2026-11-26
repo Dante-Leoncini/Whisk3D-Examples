@@ -1,35 +1,20 @@
-# Whisk3D en Android
+# Plantilla Android de "Compilar juego"
 
-Backend GLES1 + SDL2, empaquetado como APK con Gradle.
+Este es el proyecto Android que usa el editor Whisk3D para compilar CUALQUIER juego a
+Android (tarjeta **Juego** > Plataforma Android > **Compilar juego**). El editor lo busca en
+`Whisk3D-Examples/ui/whiskpaddle/platform/android`, al lado del repo de Whisk3D.
 
-## Requisitos
+Lo que trae:
 
-- **Android NDK** (define `ANDROID_NDK` o dejalo en `/opt/android-ndk`).
-- **JDK 17** + el `gradlew` que ya viene en `platform/android/`. Gradle necesita `JAVA_HOME` apuntando al JDK
-  (si no, falla con *"JAVA_HOME is not set"*), por ejemplo:
-  `export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64`
+- gradle (`build.gradle`, `settings.gradle`, `gradlew`) y la app (`app/`): la Activity de
+  SDL, el `AndroidManifest.xml` y los iconos de fabrica.
+- `jni/`: `Application.mk` y los headers de compatibilidad (`shim/`).
 
-## Compilar (lo mas facil)
+Para cada juego, el editor copia esta carpeta a `platform-build/android/androidprj/`, le
+pone el nombre del juego (`applicationId` y titulo), su icono y su orientacion, genera su
+`jni/Android.mk` (el runtime `game/` + el Core + el `main.cpp` del juego) y arma el APK con
+`ndk-build` + `./gradlew assembleDebug`. El APK queda en `build/android/` del juego.
 
-Desde la raiz del repo:
-
-```bash
-platform/android/build_android.sh
-```
-
-El script:
-1. Copia `res/` a los assets del APK.
-2. Compila las librerias nativas con `ndk-build` para las ABIs (por defecto `arm64`, `amd64`, `arm32`).
-3. Empaqueta el APK con `./gradlew assembleDebug` (firmado con el keystore de debug).
-
-Para una sola ABI: `platform/android/build_android.sh arm64`.
-
-## A mano (solo el APK, si ya estan las `.so`)
-
-```bash
-cd platform/android && ./gradlew assembleDebug
-```
-
-## Salida
-
-El APK queda en `platform/android/app/distribution/android/app/outputs/apk/debug/whisk3d-*-Android.apk`.
+Requisitos: el NDK y el SDK de Android (`local.properties` con `sdk.dir`) y el JDK 17
+(`JAVA_HOME`). Lo que se genera al compilar (`app/distribution/`, `libs/`, `obj/`,
+`app/src/main/assets/`, `app/src/main/jniLibs/`) no va al repo.

@@ -1,30 +1,30 @@
 # ============================================================================
-#  Salidas de compilacion del WhiskPaddle. Todo esto se REGENERA con los scripts de
-#  platform/<plataforma>/ ; nada de esto va al repo.
+#  Salidas de compilacion del WhiskPaddle. Todo esto se REGENERA; nada de esto
+#  va al repo. (En .gitignore un '#' solo comenta al PRINCIPIO de la linea: un
+#  comentario al final de una regla la rompe.)
 # ============================================================================
 
-# ---- Linux (cmake) ----
-platform/linux/build/
+# ---- "Compilar juego" (editor Whisk3D): lo generado y los resultados ----
+platform-build/
+build/
 
-# ---- Web (emscripten) ----
-platform/web/build/
-
-# ---- Android (ndk-build + gradle) ----
+# ---- la plantilla Android (platform/android): lo que deja un build en ella ----
 platform/android/libs/
 platform/android/obj/
 platform/android/.gradle/
 platform/android/.cxx/
 platform/android/distribution/
 platform/android/app/build/
-platform/android/app/src/main/assets/     # se copian del juego en cada build
-platform/android/app/src/main/jniLibs/     # .so compiladas por el ndk
-platform/android/local.properties          # ruta del SDK (propia de cada maquina)
+# buildDir real de gradle (build.gradle lo redirige a app/distribution/)
+platform/android/app/distribution/
+# se copian del juego en cada build
+platform/android/app/src/main/assets/
+# las .so compiladas por el ndk
+platform/android/app/src/main/jniLibs/
+# la ruta del SDK (propia de cada maquina)
+platform/android/local.properties
 
-# ---- Compilar juego (editor Whisk3D): lo generado y los resultados ----
-platform-build/
-build/
-
-# ---- artefactos empaquetados (no se suben al git) ----
+# ---- artefactos empaquetados ----
 *.apk
 *.deb
 *.AppImage

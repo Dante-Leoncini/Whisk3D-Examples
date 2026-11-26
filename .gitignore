@@ -1,6 +1,10 @@
 # builds
 build/
 */build/
+# lo que genera "Compilar juego" del editor en cada proyecto
+platform-build/
+# el log del motor (lo deja cualquier ejemplo o juego al correr)
+whisk3d.log
 # salida WebGL generada por emcc
 core/web/
 

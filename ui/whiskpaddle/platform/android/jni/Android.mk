@@ -25,18 +25,29 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := main
 # ^ "main" por convencion de SDLActivity (System.loadLibrary("main") -> libmain.so).
 
+# El almacen de recursos, los datos compartidos, los flipbooks y los binds de cuerpos rigidos /
+# colision contra mallas van SIEMPRE (el Core los nombra sin ifdef): misma lista que kFuentesBase
+# de main/io/CompilarJuego.cpp, la de los juegos que compila el editor.
 SRC_FILES := \
-  $(EXAMP)/ui/whiskpaddle/main.cpp \
+  $(EXAMP)/ui/whiskpaddle/platform/main.cpp \
   $(EXAMP)/game/w3drun.cpp \
   $(CORE)/gles2/w3dGraphicsGLES2.cpp $(CORE)/gfx/w3dTexture.cpp \
   $(CORE)/io/w3dFilesystem.cpp $(CORE)/io/w3dCompress.cpp \
+  $(CORE)/io/W3dTexto.cpp $(CORE)/io/W3dMalla.cpp $(CORE)/io/W3dMallaBin.cpp \
+  $(CORE)/io/W3dRecursos.cpp \
   $(CORE)/base/w3dlog.cpp $(CORE)/base/W3dInteractionState.cpp $(CORE)/base/W3dConfig.cpp \
   $(CORE)/math/Vector3.cpp $(CORE)/math/Quaternion.cpp $(CORE)/math/Matrix4.cpp \
   $(CORE)/objects/Objects.cpp $(CORE)/objects/Mesh.cpp $(CORE)/objects/Light.cpp \
   $(CORE)/objects/Materials.cpp $(CORE)/objects/Textures.cpp $(CORE)/objects/CameraBase.cpp \
   $(CORE)/objects/Armature.cpp $(CORE)/objects/RenderColors.cpp \
+  $(CORE)/objects/MallaDatos.cpp $(CORE)/objects/MallaRecurso.cpp $(CORE)/objects/TexturaCache.cpp \
   $(CORE)/animation/Animation.cpp $(CORE)/animation/VertexAnimation.cpp \
-  $(CORE)/animation/SkeletalAnimation.cpp $(CORE)/script/W3dScript.cpp \
+  $(CORE)/animation/SkeletalAnimation.cpp $(CORE)/animation/Armature2DAnimation.cpp \
+  $(CORE)/animation/W3dAnimSet.cpp \
+  $(CORE)/animation/Flipbook.cpp \
+  $(CORE)/script/W3dScript.cpp \
+  $(CORE)/physics/W3dRigido.cpp $(CORE)/physics/W3dColMalla.cpp \
+  $(CORE)/physics/W3dHitbox.cpp \
   $(CORE)/physics/W3dFisica.cpp \
   $(CORE)/audio/W3dAudio.cpp $(CORE)/audio/W3dAudioSDL.cpp \
   $(UILIB)/text/W3dFont.cpp $(UILIB)/text/bitmapText.cpp $(UILIB)/text/font.cpp \

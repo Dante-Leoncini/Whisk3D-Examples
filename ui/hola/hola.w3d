@@ -2,22 +2,21 @@
   "version": 3,
   "fps": 60,
   "fullscreen": false,
-  "escena": {
-    "objetos": [
+  "scene": {
+    "objects": [
       {
-        "tipo": "script",
-        "nombre": "Script",
+        "type": "script",
+        "name": "Script",
         "pos": [0, 0, 0],
         "rot": [0, 0, 0],
-        "escala": [1, 1, 1],
-        "fisica": { "velocidad": 0.1, "piso": 0, "gravedad": 1, "limiteIzquierdo": -2, "limiteDerecho": 2, "limiteFondo": -2, "limiteFrente": 2, "velocidadMaximaCaida": 2, "potenciaSalto": 2 },
+        "scale": [1, 1, 1],
         "scripts": [
-          { "archivo": "hola.lua", "refs": { "cuadro": "Cuadro" } }
+          { "file": "contenido/hola.lua", "refs": { "cuadro": "Cuadro" } }
         ]
       },
       {
-        "tipo": "ui",
-        "archivo": "hola.w3dui"
+        "type": "ui",
+        "file": "contenido/hola.w3dui"
       }
     ]
   },

@@ -1,32 +1,13 @@
 # ============================================================================
-#  Salidas de compilacion del Consola. Todo esto se REGENERA con los scripts de
-#  platform/<plataforma>/ ; nada de esto va al repo.
+#  Salidas de "Compilar juego" (editor Whisk3D) del Consola: se regeneran en cada
+#  compilacion; nada de esto va al repo.
 # ============================================================================
 
-# ---- Linux (cmake) ----
-platform/linux/build/
-
-# ---- Web (emscripten) ----
-platform/web/build/
-
-# ---- Android (ndk-build + gradle) ----
-platform/android/libs/
-platform/android/obj/
-platform/android/.gradle/
-platform/android/.cxx/
-platform/android/distribution/
-platform/android/app/build/
-# buildDir real de gradle (build.gradle lo redirige a app/distribution/)
-platform/android/app/distribution/
-platform/android/app/src/main/assets/     # se copian del juego en cada build
-platform/android/app/src/main/jniLibs/     # .so compiladas por el ndk
-platform/android/local.properties          # ruta del SDK (propia de cada maquina)
-
-# ---- Compilar juego (editor Whisk3D): lo generado y los resultados ----
+# lo generado (main.cpp, CMakeLists, assets copiados, build.log) y los resultados
 platform-build/
 build/
 
-# ---- artefactos empaquetados (no se suben al git) ----
+# ---- artefactos empaquetados ----
 *.apk
 *.deb
 *.AppImage

@@ -1,0 +1,3 @@
+# Salidas de "Compilar juego" (Whisk3D): se regeneran, no van al repo
+platform-build/
+build/

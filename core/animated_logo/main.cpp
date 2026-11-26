@@ -5,19 +5,23 @@
 //
 //      #include "io/w3dGltf.h"     // loader + renderer glTF/GLB del Whisk3DCore
 //      gltf::Model model;
-//      gltf::LoadFile("assets", "whisk3d_logo.glb", model);   // <- carga desde archivo
-//      gltf::Draw(model, tiempoSeg, vx, vy, vw, vh);          // <- dibuja animado
+//      gltf::LoadG(LeerArchivo, &carpeta, "whisk3d_logo.glb", model);   // <- carga (los bytes los da LeerArchivo)
+//      gltf::Draw(model, tiempoSeg, vx, vy, vw, vh);                     // <- dibuja animado
 //
-//  El ejemplo NO toca GL directo ni parsea nada: solo elige DONDE va el viewport.
-//  Corre igual en desktop y en WebGL. SOLO glTF/GLB (los demas formatos son extras
-//  del editor). El modelo puede venir de un ARCHIVO (LoadFile) o de un pack cifrado
-//  (gltf::Load(pack, ...) — ver RQ_Games).
+//  El ejemplo NO toca GL directo ni parsea nada: solo dice de DONDE salen los bytes
+//  (archivos de una carpeta) y DONDE va el viewport. Corre igual en desktop y en
+//  WebGL. SOLO glTF/GLB (los demas formatos son extras del editor). El modelo puede
+//  venir de ARCHIVOS (como aca) o de un pack cifrado (gltf::Load(pack, ...)).
 // ============================================================================
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include "w3dGraphics.h"     // render del Core (w3dEngine)
 #include "w3dlog.h"          // log del Core
 #include "io/w3dGltf.h"      // loader + renderer glTF/GLB (DEL CORE)
+#include "io/w3dFilesystem.h"  // w3dFileSystem::ReadFileBytes (disco en desktop, el VFS de emscripten en web)
+#include <map>
+#include <string>
+#include <vector>
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
     #include <emscripten/html5.h>
@@ -30,6 +34,26 @@ static bool         g_run  = true;
 static gltf::Model  g_model;
 static bool         g_ok   = false;   // el logo se cargo bien
 static unsigned int g_t0   = 0;       // ticks del arranque (tiempo de animacion)
+static float        g_aspect = 1.0f;  // ancho/alto del logo (ver LogoAspect)
+
+// LOS BYTES DEL MODELO: gltf::LoadG le pide cada archivo por su nombre (el .glb y sus texturas externas) y esto los
+// lee de una carpeta con el Core. Los guarda mientras dura la carga: LoadG copia lo que necesita.
+struct Carpeta { std::string ruta; std::map<std::string, std::vector<unsigned char> > leidos; };
+static const unsigned char* LeerArchivo(void* ctx, const char* nombre, size_t* largo) {
+    Carpeta* c = (Carpeta*)ctx;
+    std::vector<unsigned char>& d = c->leidos[nombre];
+    if (d.empty() && !w3dFileSystem::ReadFileBytes(c->ruta + "/" + nombre, d)) d.clear();
+    *largo = d.size();
+    return d.empty() ? 0 : &d[0];
+}
+// las PROPORCIONES del logo (ancho/alto), con la misma cuenta con que gltf::Draw lo encuadra: el ancho cuenta el
+// giro (el radio en Z), porque el logo rota sobre su eje vertical
+static float LogoAspect(const gltf::Model& m) {
+    Vector3 ext = m.bmax - m.bmin;
+    float hx = ext.x * 0.5f, rz = ext.z * 0.5f, hy = ext.y * 0.5f;
+    if (rz > hx) hx = rz;
+    return (hx > 1e-4f && hy > 1e-4f) ? hx / hy : 1.0f;
+}
 
 static int g_lastW = 0, g_lastH = 0;
 static void tamActual(int* w, int* h) {
@@ -66,9 +90,9 @@ static void frame() {
         float t = (SDL_GetTicks() - g_t0) / 1000.0f;
 
         // Viewport CENTRADO en el medio de la ventana, manteniendo las proporciones
-        // del logo (g_model.fitAspect = ancho/alto). Ocupa como mucho el 70% del lado
+        // del logo (g_aspect = ancho/alto). Ocupa como mucho el 70% del lado
         // mas chico -> siempre entra, centrado, en ventanas verticales u horizontales.
-        float aspect = g_model.fitAspect; if (aspect < 0.05f) aspect = 0.05f;
+        float aspect = g_aspect; if (aspect < 0.05f) aspect = 0.05f;
         int maxW = (int)(w * 0.70f), maxH = (int)(h * 0.70f);
         int lw = maxW, lh = (int)(lw / aspect + 0.5f);
         if (lh > maxH) { lh = maxH; lw = (int)(lh * aspect + 0.5f); }
@@ -102,10 +126,12 @@ int main(int, char**) {
     w3dLogReset();
 
     // Carga el logo animado + su textura desde la carpeta "assets" (embebida en web con
-    // --embed-file assets@assets). El Core resuelve la textura externa (image_0.png)
-    // relativa a esa misma carpeta. Devuelve false si el .glb no esta o esta corrupto.
-    if (gltf::LoadFile("assets", "whisk3d_logo.glb", g_model)) {
+    // --embed-file). La textura externa (image_0.png) la pide el Core por su nombre y
+    // LeerArchivo la busca en esa misma carpeta. false si el .glb no esta o esta corrupto.
+    Carpeta assets; assets.ruta = "assets";
+    if (gltf::LoadG(LeerArchivo, &assets, "whisk3d_logo.glb", g_model)) {
         g_ok = true; g_t0 = SDL_GetTicks();
+        g_aspect = LogoAspect(g_model);
         w3dLog("animated_logo: logo cargado con el Core (glTF/GLB)");
     } else {
         w3dLogE("animated_logo: no pude cargar assets/whisk3d_logo.glb — sigo con fondo negro");

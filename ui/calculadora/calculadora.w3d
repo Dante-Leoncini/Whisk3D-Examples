@@ -1,35 +1,36 @@
 {
   "version": 3,
-  "icono": "assets/icono.png",
-  "escenaInicial": "Calculadora",
-  "compilar": {
-    "modoVentana": "ventana",
-    "orientacion": "vertical",
-    "fisica": false,
-    "sonido": false,
+  "icon": "contenido/assets/icono.png",
+  "initialScene": "Calculadora",
+  "compile": {
+    "windowMode": "window",
+    "orientation": "vertical",
+    "physics": false,
+    "sound": false,
     "debug": false,
-    "assets": "sueltos",
-    "plataforma": "linux-deb"
+    "assets": "loose",
+    "platform": "linux-deb"
   },
-  "paletas": [
-    { "nombre": "Whisk3D", "colores": [
-      { "nombre": "Fondo", "color": [0.05, 0.05, 0.05, 1] },
-      { "nombre": "Blanco", "color": [1, 1, 1, 1] },
-      { "nombre": "Accent", "color": [0, 1, 0, 1] },
-      { "nombre": "Accent oscuro", "color": [0.4, 0.55, 0, 1] },
-      { "nombre": "Negro", "color": [0, 0, 0, 1] },
-      { "nombre": "Gris", "color": [0.12, 0.12, 0.12, 1] },
-      { "nombre": "Gris UI", "color": [0.75, 0.75, 0.75, 1] },
-      { "nombre": "Gris linea", "color": [0.286, 0.286, 0.286, 1] }
+  "palettes": [
+    { "name": "Whisk3D", "colors": [
+      { "name": "Fondo", "color": [0.05, 0.05, 0.05, 1] },
+      { "name": "Blanco", "color": [1, 1, 1, 1] },
+      { "name": "Accent", "color": [0, 1, 0, 1] },
+      { "name": "Accent oscuro", "color": [0.4, 0.55, 0, 1] },
+      { "name": "Negro", "color": [0, 0, 0, 1] },
+      { "name": "Gris", "color": [0.12, 0.12, 0.12, 1] },
+      { "name": "Gris UI", "color": [0.75, 0.75, 0.75, 1] },
+      { "name": "Gris linea", "color": [0.286, 0.286, 0.286, 1] }
     ] }
   ],
   "fps": 60,
   "fullscreen": false,
-  "escena": {
-    "objetos": [
+  "playing": true,
+  "scene": {
+    "objects": [
       {
-        "tipo": "ui",
-        "archivo": "calculadora.w3dui"
+        "type": "ui",
+        "file": "contenido/calculadora.w3dui"
       }
     ]
   },

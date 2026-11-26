@@ -1,22 +1,44 @@
 {
   "version": 3,
-  "icono": "assets/icono.png",
-  "escenaInicial": "Menu",
+  "icon": "contenido/assets/icono.png",
+  "initialScene": "Menu",
+  "compile": {
+    "windowMode": "fullscreen",
+    "orientation": "all",
+    "physics": true,
+    "sound": true,
+    "debug": false,
+    "assets": "loose",
+    "platform": "linux-deb"
+  },
+  "palettes": [
+    { "name": "Whisk3D", "colors": [
+      { "name": "Fondo", "color": [0.05, 0.05, 0.05, 1] },
+      { "name": "Blanco", "color": [1, 1, 1, 1] },
+      { "name": "Accent", "color": [0, 1, 0, 1] },
+      { "name": "Accent oscuro", "color": [0.4, 0.55, 0, 1] },
+      { "name": "Negro", "color": [0, 0, 0, 1] },
+      { "name": "Gris", "color": [0.12, 0.12, 0.12, 1] },
+      { "name": "Gris UI", "color": [0.75, 0.75, 0.75, 1] },
+      { "name": "Gris linea", "color": [0.286, 0.286, 0.286, 1] }
+    ] }
+  ],
   "fps": 60,
   "fullscreen": false,
-  "escena": {
-    "objetos": [
+  "playing": false,
+  "scene": {
+    "objects": [
       {
-        "tipo": "ui",
-        "archivo": "menu.w3dui"
+        "type": "ui",
+        "file": "contenido/menu.w3dui"
       },
       {
-        "tipo": "ui",
-        "archivo": "dificultad.w3dui"
+        "type": "ui",
+        "file": "contenido/dificultad.w3dui"
       },
       {
-        "tipo": "ui",
-        "archivo": "juego.w3dui"
+        "type": "ui",
+        "file": "contenido/juego.w3dui"
       }
     ]
   },
