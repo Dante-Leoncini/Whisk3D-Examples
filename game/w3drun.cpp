@@ -717,7 +717,8 @@ void W3dGameRender(int winW, int winH) {
 
     UI2D_BaseClip(0, 0, winW, winH);
     // pedirle al overlay las posiciones RESUELTAS (para que uiBox() las lea desde el lua)
-    std::vector<UI2DPos> positions;
+    static std::vector<UI2DPos> positions;   // (reusado: sin volver a pedir memoria en cada cuadro)
+    positions.clear();
     UI2D_DrawOverlay(x0, y0, dw, dh, esc, &positions);
     // alimentar a BindsJuego el mapeo + el rect SEGURO (px de ventana) + las posiciones resueltas,
     // para que safeArea()/uiBox() lean lo mismo que se dibujo (IGUAL que en el editor via SimJuego)
